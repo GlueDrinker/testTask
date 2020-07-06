@@ -1,5 +1,5 @@
 <?php 
-	$mysqli = mysqli_connect('localhost', 'root', '', 'TestTask');
+	$mysqli = mysqli_connect('mysql.zzz.com.ua', 'gluedrinker', 'TksDq2B6', 'gluedrinker');
 	
 	$authUserName = $_GET['authUserName'];
 	$inputPassword = $_GET['inputPassword'];

@@ -1,7 +1,11 @@
 <?php 
-	$mysqli = mysqli_connect('localhost', 'root', '', 'TestTask');
+	$mysqli = mysqli_connect('mysql.zzz.com.ua', 'gluedrinker', 'TksDq2B6', 'gluedrinker');
 	$column = $_GET['column'];
 	$order = $_GET['order'];
+	$submitButton = $_GET['submitButton'];
+	$insertUserName = $_GET['insertUserName'];
+	$email = $_GET['email'];
+	$text = mysqli_real_escape_string($mysqli, $_GET['text']);
 	function queryWithOrder($startFrom, $column, $order) {
 		switch ($column) {
 					case 'Электронная почта':
@@ -22,14 +26,9 @@
 			return "SELECT * FROM `tasks` ORDER BY $column LIMIT $startFrom, 3";
 		}
 	}
-	function taskChange($id, $text, $status) {
-		if ($status == "<input type = 'checkbox' checked>") {
-			$status = 1;
-		}
-		else {
-			$status = 0;
-		}
-		$ins = mysqli_query($GLOBALS['mysqli'], "UPDATE `tasks` SET `text` = '$text', `taskComplete` = '$status', `changedByAdmin` = '1' WHERE `tasks`.`id` = '$id'");
+	function taskInsertion($insertUserName, $email, $text) {
+		$ins = mysqli_query($GLOBALS['mysqli'], "INSERT INTO `tasks` (`userName`, `email`, `text`, `taskComplete`, `changedByAdmin`) VALUES ('$insertUserName', '$email', '$text', '0', '0')");
+		echo "<strong>Запись добавлена</strong>";
 	}
 ?>
 <!DOCTYPE html>
@@ -46,7 +45,7 @@
 		</form>
 	</nav>
 	<div class="container-fluid">
-		<form action="action.php" method="get">
+		<form action="admin.php" method="get">
 			<div class="row">
 				<div class="col-4">
 					<p>Введите имя пользователя: <input type="text" name="insertUserName" required></p>
@@ -100,9 +99,8 @@
 				$startFrom = ($page - 1) * 3;
 				$query = queryWithOrder($startFrom, $column, $order);
 				$result = mysqli_query($mysqli, $query);
-				$status = [];
-				$buttonsArray = [];
-				$changedTexts = [];
+				$status = '';
+				
 				echo "<form action = 'admin.php' method = 'get'>
 				<table class = 'table table-bordered'>
 					<tr>
@@ -114,10 +112,10 @@
 					</tr>";
 				while ($row = mysqli_fetch_array($result)) {
 					if ($row['taskComplete'] == 1) {
-						$status[$row['id']] = "<input type = 'checkbox' checked>";
+						$status = "<input name = 'changedStatus" . $row['id'] . "' type = 'checkbox' checked>";
 					}
 					else {
-						$status[$row['id']] = "<input type = 'checkbox'>";
+						$status = "<input name = 'changedStatus" . $row['id'] . "' type = 'checkbox'>";
 					}
 					
 					echo "
@@ -125,15 +123,25 @@
 						<td>" . $row['userName'] . "</td>
 						<td>" . $row['email'] . "</td>
 						<td><textarea name = 'changedText" . $row['id'] . "'>" . htmlspecialchars($row['text']) . "</textarea></td>
-						<td>" . $status[$row['id']] . "</td>
+						<td>" . $status . "</td>
 						<td><input type = 'submit' value = 'Сохранить' name = 'changeButton" . $row['id'] . "'></td>
 					</tr>
 					";
-					$buttonsArray[$row['id']] =  $_GET['changeButton' . $row['id'] . ''];
-					$changedTexts[$row['id']] =  $_GET['changedText' . $row['id'] . ''];
-					if ($buttonsArray[3]) {
-						echo "<script>alert('test')<.script>";
+					if(isset($_GET['changeButton' . $row['id'] . ''])) {
+						if (!empty($_GET['changedStatus' . $row['id'] . ''])) {
+							$status = 1;
+						}
+						else {
+							$status = 0;
+						}
+						if (($_GET['changedText' . $row['id'] . ''] == htmlspecialchars($row['text'])) && $row['changedByAdmin'] == '0') {
+							$ins = mysqli_query($mysqli, "UPDATE `tasks` SET `text` = '" . $_GET['changedText' . $row['id'] . ''] . "', `taskComplete` = '$status', `changedByAdmin` = '0' WHERE `id` = '" . $row['id'] . "'");
+						}
+						else {
+							$ins = mysqli_query($mysqli, "UPDATE `tasks` SET `text` = '" . $_GET['changedText' . $row['id'] . ''] . "', `taskComplete` = '$status', `changedByAdmin` = '1' WHERE `id` = '" . $row['id'] . "'");
+						}
 					}
+					
 				}
 				echo "</table>";
 

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <?php 
-	$mysqli = mysqli_connect('localhost', 'root', '', 'TestTask');
+	$mysqli = mysqli_connect('mysql.zzz.com.ua', 'gluedrinker', 'TksDq2B6', 'gluedrinker');
 	$column = $_GET['column'];
 	$order = $_GET['order'];
 	$orderSubmit = $_GET['orderButton'];
@@ -144,7 +144,7 @@
 				$amountOfRecords = mysqli_num_rows($pagesResult);
 				$amountOfPages = ceil($amountOfRecords / 3);
 				for ($i = 1; $i <= $amountOfPages; $i++) { 
-					echo '<a href = "index.php?page=' . $i . '&column=' . $column . '&order=' . $order . '">' . $i . '</a>';
+					echo '<a href = "index.php?page=' . $i . '&column=' . $column . '&order=' . $order . '">' . $i . ' </a>';
 				}
 			?>
 		</div>
